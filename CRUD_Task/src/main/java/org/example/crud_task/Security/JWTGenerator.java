@@ -1,44 +1,52 @@
 package org.example.crud_task.Security;
 
-import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.Jwt;
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
+import io.jsonwebtoken.*;
+import io.jsonwebtoken.security.Keys;
 import org.springframework.security.authentication.AuthenticationCredentialsNotFoundException;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
 
+import javax.crypto.SecretKey;
+import java.util.Base64;
 import java.util.Date;
 
 @Component
 public class JWTGenerator {
-    public String generateToken(Authentication authentication){
-        String username = authentication.getName();
-        Date current = new Date();
-        Date expiredDate = new Date(current.getTime() + SecurityConstant.JWT_EXPIRATION);
 
-        String token = Jwts.builder()
+
+
+    public String generateToken(String username) {
+        SecretKey key = Keys.secretKeyFor(SignatureAlgorithm.HS512);
+        long expirationTime = 1000 * 60 * 60; // 1 hour
+        return Jwts.builder()
                 .setSubject(username)
                 .setIssuedAt(new Date())
-                .setExpiration(expiredDate)
-                .signWith(SignatureAlgorithm.HS512, SecurityConstant.JWT_SECRET)
+                .setExpiration(new Date(System.currentTimeMillis() + expirationTime))
+                .signWith(key, SignatureAlgorithm.HS512)
                 .compact();
-        return token;
     }
+
+
 
     public String getUsernameFromJWT(String token) {
         Claims claims = Jwts.parser()
-                .setSigningKey(SecurityConstant.JWT_SECRET)
-                .build().parseClaimsJws(token).getBody();
+                .setSigningKey(SecurityConstant.JWT_SECRET.getBytes())
+                .build()
+                .parseClaimsJws(token).getBody();
         return claims.getSubject();
     }
 
-    public boolean validateToken(String token){
+    public boolean validateToken(String token) {
         try {
-            Jwts.parser().setSigningKey(SecurityConstant.JWT_SECRET).build().parseClaimsJws(token);
+            Jwts.parser()
+                    .setSigningKey(SecurityConstant.JWT_SECRET.getBytes())
+                    .build()
+                    .parseClaimsJws(token);
+
             return true;
         }catch (Exception ex){
             throw new AuthenticationCredentialsNotFoundException("JWT error: ", ex);
         }
     }
 }
+

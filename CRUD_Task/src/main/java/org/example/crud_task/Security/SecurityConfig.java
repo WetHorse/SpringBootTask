@@ -2,6 +2,7 @@ package org.example.crud_task.Security;
 
 import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
+import org.apache.tomcat.util.net.openssl.ciphers.Authentication;
 import org.example.crud_task.Users.CustomUserDetailsService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -19,13 +20,13 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 
 @Configuration
 @EnableWebSecurity
-
 public class SecurityConfig {
 
     private final CustomUserDetailsService customUserDetailsService;
 
     private final JWTService jwtService;
     private final JWTFilter jwtFilter;
+
 
     public SecurityConfig(CustomUserDetailsService customUserDetailsService, JWTService jwtService, JWTFilter jwtFilter) {
         this.customUserDetailsService = customUserDetailsService;
@@ -40,13 +41,19 @@ public class SecurityConfig {
                 .authorizeHttpRequests(request -> request
                         .requestMatchers("/api/users/register", "/api/users/login")
                         .permitAll()
-                        .anyRequest().authenticated())
-                .httpBasic(Customizer.withDefaults())
+                        .anyRequest().authenticated()
+                )
+                 .exceptionHandling(exception ->
+                         exception.authenticationEntryPoint(jwtService))
+//                .httpBasic(Customizer.withDefaults())
                 .sessionManagement(session ->
                         session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                  .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
          return http.build();
+
     }
+
+
 
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration configuration) throws  Exception{
@@ -56,6 +63,11 @@ public class SecurityConfig {
     @Bean
     PasswordEncoder passwordEncoder(){
         return new BCryptPasswordEncoder();
+    }
+
+
+    @Bean JWTFilter jwtFilter(){
+        return new JWTFilter();
     }
 
 }
