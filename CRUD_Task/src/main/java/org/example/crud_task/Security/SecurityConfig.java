@@ -1,14 +1,10 @@
 package org.example.crud_task.Security;
 
-import lombok.AllArgsConstructor;
-import lombok.RequiredArgsConstructor;
-import org.apache.tomcat.util.net.openssl.ciphers.Authentication;
-import org.example.crud_task.Users.CustomUserDetailsService;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.example.crud_task.Services.JWTService;
+import org.example.crud_task.Services.CustomUserDetailsService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;

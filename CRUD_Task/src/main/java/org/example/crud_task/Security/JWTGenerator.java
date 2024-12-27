@@ -16,13 +16,12 @@ public class JWTGenerator {
 
 
     public String generateToken(String username) {
-        SecretKey key = Keys.secretKeyFor(SignatureAlgorithm.HS512);
         long expirationTime = 1000 * 60 * 60; // 1 hour
         return Jwts.builder()
                 .setSubject(username)
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(System.currentTimeMillis() + expirationTime))
-                .signWith(key, SignatureAlgorithm.HS512)
+                .signWith(SignatureAlgorithm.HS512, SecurityConstant.JWT_SECRET.getBytes())
                 .compact();
     }
 

@@ -1,9 +1,11 @@
-package org.example.crud_task.Users;
+package org.example.crud_task.Controllers;
 
 import org.example.crud_task.DTO.AuthResponseDTO;
 import org.example.crud_task.DTO.LoginDTO;
 import org.example.crud_task.DTO.RegisterDTO;
+import org.example.crud_task.Repositories.PersonRepository;
 import org.example.crud_task.Security.JWTGenerator;
+import org.example.crud_task.Users.Person;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -45,10 +47,7 @@ public class PersonController {
         person.setPassword(passwordEncoder.encode(registerDTO.getPassword()));
 
         Authentication authentication = new UsernamePasswordAuthenticationToken(person.getUsername(), null);
-        String jwt = jwtGenerator.generateToken(authentication.getName());
-        System.out.println("jwt "+jwt);
-
-
+        jwtGenerator.generateToken(authentication.getName());
         personRepository.save(person);
 
         return new ResponseEntity<>("Registration complete", HttpStatus.OK);
@@ -84,11 +83,7 @@ public class PersonController {
         if (authentication == null || !authentication.isAuthenticated()) {
             return new ResponseEntity<>("Unauthorized", HttpStatus.UNAUTHORIZED);
         }
-        Person person = personRepository.findById(id).orElse(null);
-        if (person == null) {
-            return new ResponseEntity<>("User not found", HttpStatus.NOT_FOUND);
-        }
-        personRepository.delete(person);
+        personRepository.deleteById(id);
         return new ResponseEntity<>("User deleted successfully", HttpStatus.OK);
     }
 
